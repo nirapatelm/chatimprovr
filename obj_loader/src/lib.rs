@@ -6,6 +6,7 @@ use cimvr_common::render::{Mesh, Vertex};
 /// OBJ line specs: https://all3dp.com/1/obj-file-format-3d-printing-cad/
 pub fn obj_lines_to_mesh(obj: &str) -> Mesh {
     let mut m = Mesh::new();
+    let mut tex_coords: Vec<[f32; 3]> = vec![]
 
     for line in obj.lines() {
         // Split the line by whitespace
@@ -57,14 +58,14 @@ pub fn obj_lines_to_mesh(obj: &str) -> Mesh {
                 let mut uvw = [0.; 3];
 
                 for dim in &mut uvw {
-                    let Some(text) = rest.next() else { break };
-                    *dim = text.parse().expect("Invalid float");
-
-                    //*dim -= 1;
+                    if let Some(text) = rest.next() {
+                        *dim = text.parse().expect("Invalid float");
+                    } else {
+                        break;
+                    }
                 }
-
-                // Add to list of vts
-                // m.vt_indices.extend(uvw);
+                // Store parsed texture coord
+                tex_coords.push(uvw);
             }
             Some("f") => {
                 // Faces
