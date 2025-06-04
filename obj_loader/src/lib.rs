@@ -6,7 +6,8 @@ use cimvr_common::render::{Mesh, Vertex};
 /// OBJ line specs: https://all3dp.com/1/obj-file-format-3d-printing-cad/
 pub fn obj_lines_to_mesh(obj: &str) -> Mesh {
     let mut m = Mesh::new();
-    let mut tex_coords: Vec<[f32; 3]> = vec![]
+    let mut tex_coords: Vec<[f32; 3]> = vec![];
+    let mut normals: Vec<[f32; 3]> = vec![];
 
     for line in obj.lines() {
         // Split the line by whitespace
@@ -139,9 +140,20 @@ pub fn obj_lines_to_mesh(obj: &str) -> Mesh {
                 }
             }
 
-            // Some("vn") => { // Vertex normals
-
-            // },
+            Some("vn") => { 
+                // Vertex normals
+                // Each vn line will look like: 'vn x y z'
+                // Represents normal vector component at given vertex
+                // Will get ref in f definition 
+                let mut normal = [0.; 3];
+                for dim in &mut normal {
+                    if let Some(text) = rest.next(){
+                        *dim = text.parse().expect("Invalid float");
+                    }
+                }
+                // Store vn 
+                normals.push(normal);
+            },
 
             // Ignore the rest
             _ => (),
